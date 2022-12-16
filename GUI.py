@@ -9,7 +9,7 @@ from PIL import Image
 
 from ocr_passport import ocr_passport
 
-ctk.set_default_color_theme("green")  # Themes: "blue" (standard), "green", "dark-blue".
+ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue".
 ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light".
 
 
@@ -62,11 +62,11 @@ class Window(ctk.CTk):
         Fill the window with widgets.
         """
         self.label_1 = ctk.CTkLabel(self, text="Оптичне розпізнавання\nсимволів Вашого\nпаспорта", 
-                                    font=("Calibri Light", 42, "bold"))
+                                    font=("Calibri Light", 42, "bold"), width=600)
         self.label_1.grid(row=0, column=0, padx=10, pady=(40, 30))
         
-        self.label_2 = ctk.CTkLabel(self, text="Оберіть фотографію\nпаспорта", 
-                                    font=self.LARGE_FONT)
+        self.label_2 = ctk.CTkLabel(self, text="Виберіть фотографію\nпаспорта", 
+                                    font=self.LARGE_FONT, width=600)
         self.label_2.grid(row=0, column=2, padx=10, pady=(40, 30))
         
         self.button = ctk.CTkButton(self, text="", width=170, height=80, corner_radius=10, 
@@ -74,11 +74,15 @@ class Window(ctk.CTk):
         self.button.grid(row=1, column=2, padx=10, pady=(0, 30))
         
         self.loading = ctk.CTkLabel(self, text="Результати\nзавантажуються...", compound="left", 
-                                    font=self.SMALL_FONT, image=self.loading_image, justify="left")
+                                    font=self.SMALL_FONT, image=self.loading_image)
         
-        self.passport_label = ctk.CTkLabel(self, text="", height=330, width=600, corner_radius=10)
+        self.frame = ctk.CTkFrame(self, height=330, width=600, fg_color="transparent", corner_radius=10)
+        self.frame.grid(row=2, column=0, padx=10, pady=(0, 40))
+        self.passport_label = ctk.CTkLabel(self.frame, text="", height=330, width=600)
+        self.passport_label.pack()
         
-        self.arrow = ctk.CTkLabel(self, text="", image=self.arrow_image)
+        self.arrow = ctk.CTkLabel(self, text="", width=100)
+        self.arrow.grid(row=2, column=1, padx=10, sticky="nswe")
         
         self.mrz_textbox = ctk.CTkTextbox(self, height=330, width=600, corner_radius=10, 
                                        font=("Consolas", 32, "bold"))
@@ -87,46 +91,48 @@ class Window(ctk.CTk):
         self.passport_path = askopenfilename(parent=self, title="Виберіть файл зображення")
         
         if self.passport_path:
-            self.passport_label.grid_remove()
-            self.arrow.grid_remove()
+            self.arrow.configure(image="")
+            self.passport_label.configure(image=None)
             self.mrz_textbox.grid_remove()
             
             self.loading.grid(row=1, column=0, padx=10, pady=(0, 30))
             
             self.mrz_textbox.delete(0.0, "end")
             
-            passport_photo = ctk.CTkImage(Image.open(self.passport_path), size=(550, 330))
-            self.passport_label.configure(image=passport_photo)
-            
             threading.Thread(target=self.mrz_to_text).start()
         
     def mrz_to_text(self):
         try:
+            passport_photo = ctk.CTkImage(Image.open(self.passport_path), size=(600, 330))
             mrz_text = ocr_passport(self.passport_path)
             self.mrz_textbox.insert(0.0, mrz_text)
             
             if mrz_text != "":
                 self.loading.grid_remove()
-                self.passport_label.grid(row=2, column=0, padx=10, pady=(0, 40))
-                self.arrow.grid(row=2, column=1, padx=10, sticky="nswe")
+                self.passport_label.configure(image=passport_photo)
+                self.arrow.configure(image=self.arrow_image)
                 self.mrz_textbox.grid(row=2, column=2, padx=10, pady=(0, 40))
             else:
                 self.loading.grid_remove()
                 self.mrz_textbox.insert(0.0, "Неможливо завантажити результати\n\nMRZ не виявлено.")
                 self.mrz_textbox.grid(row=2, column=2, padx=10, pady=(0, 40))
+                
         except ValueError:
             self.loading.grid_remove()
             self.mrz_textbox.insert(0.0, "Неможливо завантажити результати\n\nВиберіть інше фото.")
             self.mrz_textbox.grid(row=2, column=2, padx=10, pady=(0, 40))
+            
         except PIL.UnidentifiedImageError:
-            self.loading.grid_remove()
-            self.mrz_textbox.insert(0.0, "Неможливо завантажити результати\n\nВиберіть інший файл.")
-            self.mrz_textbox.grid(row=2, column=2, padx=10, pady=(0, 40))
+                self.loading.grid_remove()
+                self.mrz_textbox.insert(0.0, "Неможливо завантажити результати\n\nВиберіть інший файл.")
+                self.mrz_textbox.grid(row=2, column=2, padx=10, pady=(0, 40))
+                
         except:
             self.loading.grid_remove()
             self.mrz_textbox.insert(0.0, "Неможливо завантажити результати\n\nСпробуйте ще раз.")
             self.mrz_textbox.grid(row=2, column=2, padx=10, pady=(0, 40))
-        
+
+
 if __name__ == "__main__":
     root = Window()
     root.mainloop()
