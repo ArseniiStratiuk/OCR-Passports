@@ -74,15 +74,17 @@ class Window(ctk.CTk):
         self.button.grid(row=1, column=2, padx=10, pady=(0, 30))
         
         self.loading = ctk.CTkLabel(self, text="Результати\nзавантажуються...", compound="left", 
-                                    font=self.SMALL_FONT, image=self.loading_image)
+                                    font=self.SMALL_FONT, image=self.loading_image, justify="left")
         
         self.frame = ctk.CTkFrame(self, height=330, width=600, fg_color="transparent", corner_radius=10)
         self.frame.grid(row=2, column=0, padx=10, pady=(0, 40))
         self.passport_label = ctk.CTkLabel(self.frame, text="", height=330, width=600)
         self.passport_label.pack()
         
-        self.arrow = ctk.CTkLabel(self, text="", width=100)
-        self.arrow.grid(row=2, column=1, padx=10, sticky="nswe")
+        self.arrow_frame = ctk.CTkFrame(self, width=100, fg_color="transparent")
+        self.arrow_frame.grid(row=2, column=1, padx=10)
+        self.arrow_label = ctk.CTkLabel(self.arrow_frame, image=self.arrow_image, 
+                                        text="", width=100)
         
         self.mrz_textbox = ctk.CTkTextbox(self, height=330, width=600, corner_radius=10, 
                                        font=("Consolas", 32, "bold"))
@@ -91,7 +93,7 @@ class Window(ctk.CTk):
         self.passport_path = askopenfilename(parent=self, title="Виберіть файл зображення")
         
         if self.passport_path:
-            self.arrow.configure(image="")
+            self.arrow_label.pack_forget()
             self.passport_label.configure(image=None)
             self.mrz_textbox.grid_remove()
             
@@ -110,7 +112,7 @@ class Window(ctk.CTk):
             if mrz_text != "":
                 self.loading.grid_remove()
                 self.passport_label.configure(image=passport_photo)
-                self.arrow.configure(image=self.arrow_image)
+                self.arrow_label.pack()
                 self.mrz_textbox.grid(row=2, column=2, padx=10, pady=(0, 40))
             else:
                 self.loading.grid_remove()
