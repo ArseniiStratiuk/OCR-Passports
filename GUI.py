@@ -86,6 +86,11 @@ class Window(ctk.CTk):
         
         self.mrz_textbox = ctk.CTkTextbox(self, height=330, width=600, corner_radius=10, 
                                        font=("Consolas", 32, "bold"))
+
+        # self.frame_theme = ctk.CTkFrame(self, fg_color="transparent")
+        # self.frame_theme.grid(row=2, column=0, columnspan=3, sticky="nswe")
+
+        # self.label_theme = ctk.CtkLabel(self, text="Вигляд Вікна")
         
     def set_mrz(self):
         self.passport_path = askopenfilename(parent=self, title="Виберіть файл зображення")
@@ -112,6 +117,10 @@ class Window(ctk.CTk):
                 self.passport_label.configure(image=passport_photo)
                 self.arrow_label.pack()
                 self.mrz_textbox.grid(row=2, column=2, padx=10, pady=(0, 40))
+
+                with open(os.path.join(sys.path[0], "Result.txt"), "a") as out:
+                    out.write("\n\n" + mrz_text + "\n------------------------------")
+
             else:
                 self.loading.grid_remove()
                 self.mrz_textbox.insert(0.0, "Неможливо завантажити результати\n\nMRZ не виявлено.")
