@@ -90,7 +90,14 @@ class Window(ctk.CTk):
         # self.frame_theme = ctk.CTkFrame(self, fg_color="transparent")
         # self.frame_theme.grid(row=2, column=0, columnspan=3, sticky="nswe")
 
-        # self.label_theme = ctk.CtkLabel(self, text="Вигляд Вікна")
+        # self.label_theme = ctk.CTkLabel(self.frame_theme, text="Вигляд вікна:", font=self.SMALL_FONT)
+        # self.appearance_mode = ctk.CTkOptionMenu(self.frame_theme, font=("Calibri", 16), 
+        #                                          values=["Світлий", "Темний"], text_color=("#1f1f1f", "#ebebeb"), 
+        #                                          command=self.change_appearance_mode)
+        # self.appearance_mode.set("Темний")
+        # self.appearance_mode.pack(pady=(0, 80), padx=20, side="bottom")
+        
+        # self.label_mode.pack(pady=20, padx=20, side="bottom")
         
     def set_mrz(self):
         self.passport_path = askopenfilename(parent=self, title="Виберіть файл зображення")
@@ -140,6 +147,12 @@ class Window(ctk.CTk):
             self.loading.grid_remove()
             self.mrz_textbox.insert(0.0, "Неможливо завантажити результати\n\nСпробуйте ще раз.")
             self.mrz_textbox.grid(row=2, column=2, padx=10, pady=(0, 40))
+
+    def change_appearance_mode(self, new_appearance_mode):
+        """
+        Change the window's theme (Dark or Light).
+        """
+        ctk.set_appearance_mode(new_appearance_mode)
 
 
 if __name__ == "__main__":
