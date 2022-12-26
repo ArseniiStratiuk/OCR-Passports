@@ -96,7 +96,7 @@ class Window(ctk.CTk):
                                                  command=self.change_appearance_mode)
         self.appearance_mode.set("Темний")
         self.label_mode.pack(pady=(10, 40), padx=(20, 10))
-        self.appearance_mode.pack(pady=(10, 40), padx=(10, 20))
+        self.appearance_mode.pack(pady=(10, 40), padx=(10, 20), side="right")
                 
     def set_mrz(self):
         self.passport_path = askopenfilename(parent=self, title="Виберіть файл зображення")
@@ -130,7 +130,7 @@ class Window(ctk.CTk):
             else:
                 self.loading.grid_remove()
                 self.mrz_textbox.insert(0.0, "Неможливо завантажити результати\n\nMRZ не виявлено.")
-                self.mrz_textbox.grid(row=2, column=2, padx=10, pady=(0, 40))
+                self.mrz_textbox.grid(row=2, column=2, padx=10, pady=(0, 20))
                 
         except ValueError:
             self.loading.grid_remove()
