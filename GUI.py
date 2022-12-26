@@ -75,7 +75,7 @@ class Window(ctk.CTk):
                                     font=self.SMALL_FONT, image=self.loading_image, justify="left")
         
         self.frame = ctk.CTkFrame(self, height=330, width=600, fg_color="transparent", corner_radius=10)
-        self.frame.grid(row=2, column=0, padx=10, pady=(0, 40))
+        self.frame.grid(row=2, column=0, padx=10, pady=(0, 20))
         self.passport_label = ctk.CTkLabel(self.frame, text="", height=330, width=600)
         self.passport_label.pack()
         
@@ -87,18 +87,17 @@ class Window(ctk.CTk):
         self.mrz_textbox = ctk.CTkTextbox(self, height=330, width=600, corner_radius=10, 
                                        font=("Consolas", 32, "bold"))
 
-        # self.frame_theme = ctk.CTkFrame(self, fg_color="transparent")
-        # self.frame_theme.grid(row=2, column=0, columnspan=3, sticky="nswe")
+        self.frame_theme = ctk.CTkFrame(self, fg_color="transparent")
+        self.frame_theme.grid(row=3, column=0, columnspan=3, sticky="nswe")
 
-        # self.label_theme = ctk.CTkLabel(self.frame_theme, text="Вигляд вікна:", font=self.SMALL_FONT)
-        # self.appearance_mode = ctk.CTkOptionMenu(self.frame_theme, font=("Calibri", 16), 
-        #                                          values=["Світлий", "Темний"], text_color=("#1f1f1f", "#ebebeb"), 
-        #                                          command=self.change_appearance_mode)
-        # self.appearance_mode.set("Темний")
-        # self.appearance_mode.pack(pady=(0, 80), padx=20, side="bottom")
-        
-        # self.label_mode.pack(pady=20, padx=20, side="bottom")
-        
+        self.label_theme = ctk.CTkLabel(self.frame_theme, text="Вигляд вікна:", font=self.SMALL_FONT)
+        self.appearance_mode = ctk.CTkOptionMenu(self.frame_theme, font=("Calibri", 16), 
+                                                 values=["Світлий", "Темний"], text_color=("#1f1f1f", "#ebebeb"), 
+                                                 command=self.change_appearance_mode)
+        self.appearance_mode.set("Темний")
+        self.label_mode.pack(pady=(10, 40), padx=(20, 10))
+        self.appearance_mode.pack(pady=(10, 40), padx=(10, 20))
+                
     def set_mrz(self):
         self.passport_path = askopenfilename(parent=self, title="Виберіть файл зображення")
         
@@ -123,7 +122,7 @@ class Window(ctk.CTk):
                 self.loading.grid_remove()
                 self.passport_label.configure(image=passport_photo)
                 self.arrow_label.pack()
-                self.mrz_textbox.grid(row=2, column=2, padx=10, pady=(0, 40))
+                self.mrz_textbox.grid(row=2, column=2, padx=10, pady=(0, 20))
 
                 with open(os.path.join(sys.path[0], "Result.txt"), "a") as out:
                     out.write("\n\n" + mrz_text + "\n------------------------------")
@@ -136,23 +135,26 @@ class Window(ctk.CTk):
         except ValueError:
             self.loading.grid_remove()
             self.mrz_textbox.insert(0.0, "Неможливо завантажити результати\n\nВиберіть інше фото.")
-            self.mrz_textbox.grid(row=2, column=2, padx=10, pady=(0, 40))
+            self.mrz_textbox.grid(row=2, column=2, padx=10, pady=(0, 20))
             
         except PIL.UnidentifiedImageError:
                 self.loading.grid_remove()
                 self.mrz_textbox.insert(0.0, "Неможливо завантажити результати\n\nВиберіть інший файл.")
-                self.mrz_textbox.grid(row=2, column=2, padx=10, pady=(0, 40))
+                self.mrz_textbox.grid(row=2, column=2, padx=10, pady=(0, 20))
                 
         except:
             self.loading.grid_remove()
             self.mrz_textbox.insert(0.0, "Неможливо завантажити результати\n\nСпробуйте ще раз.")
-            self.mrz_textbox.grid(row=2, column=2, padx=10, pady=(0, 40))
+            self.mrz_textbox.grid(row=2, column=2, padx=10, pady=(0, 20))
 
     def change_appearance_mode(self, new_appearance_mode):
         """
         Change the window's theme (Dark or Light).
         """
-        ctk.set_appearance_mode(new_appearance_mode)
+        if new_appearance_mode == "Темний":
+            ctk.set_appearance_mode("Dark")
+        elif new_appearance_mode == "Світлий":
+            ctk.set_appearance_mode("Light")
 
 
 if __name__ == "__main__":
