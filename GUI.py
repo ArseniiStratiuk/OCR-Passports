@@ -87,16 +87,16 @@ class Window(ctk.CTk):
         self.mrz_textbox = ctk.CTkTextbox(self, height=330, width=600, corner_radius=10, 
                                        font=("Consolas", 32, "bold"))
 
-        self.frame_theme = ctk.CTkFrame(self, fg_color="transparent")
-        self.frame_theme.grid(row=3, column=0, columnspan=3, sticky="nswe")
+        # self.frame_theme = ctk.CTkFrame(self, height=10, fg_color="gray")
+        # self.frame_theme.grid(row=3, column=0, columnspan=3, sticky="we")
 
-        self.label_theme = ctk.CTkLabel(self.frame_theme, text="Вигляд вікна:", font=self.SMALL_FONT)
-        self.appearance_mode = ctk.CTkOptionMenu(self.frame_theme, font=("Calibri", 16), 
-                                                 values=["Світлий", "Темний"], text_color=("#1f1f1f", "#ebebeb"), 
-                                                 command=self.change_appearance_mode)
-        self.appearance_mode.set("Темний")
-        self.label_mode.pack(pady=(10, 40), padx=(20, 10))
-        self.appearance_mode.pack(pady=(10, 40), padx=(10, 20), side="right")
+        # self.label_theme = ctk.CTkLabel(self.frame_theme, text="Вигляд вікна:", font=self.SMALL_FONT)
+        # self.appearance_mode = ctk.CTkOptionMenu(self.frame_theme, font=("Calibri", 16), 
+        #                                          values=["Світлий", "Темний"], text_color=("#1f1f1f", "#ebebeb"), 
+        #                                          command=self.change_appearance_mode)
+        # self.appearance_mode.set("Темний")
+        # self.label_theme.pack(pady=(0, 40), padx=(20, 10))
+        # self.appearance_mode.pack(pady=(0, 40), padx=(10, 20))
                 
     def set_mrz(self):
         self.passport_path = askopenfilename(parent=self, title="Виберіть файл зображення")
