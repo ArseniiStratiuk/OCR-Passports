@@ -17,12 +17,13 @@ def ocr_passport(image) -> str:
     Separate the area containing MRZ (Machine Readable Zone) 
     from the passport photo and OCR it.
     """
-    # Load the input image, convert it to grayscale and grab its dimensions.
+    # Завантажимо вхідне зображення, перетворимо його на відтінки 
+    # сірого та візьмемо його розміри.
     image = cv2.imread(image)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     (H, W) = gray.shape
 
-    # Initialize a rectangular and square structuring kernel.
+    # Ініціалізуємо прямокутне і квадратне структурне ядро.
     rectKernel = cv2.getStructuringElement(cv2.MORPH_RECT, (25, 7))
     sqKernel = cv2.getStructuringElement(cv2.MORPH_RECT, (21, 21))
 
@@ -31,24 +32,18 @@ def ocr_passport(image) -> str:
     # background.
     gray = cv2.GaussianBlur(gray, (3, 3), 0)
     blackhat = cv2.morphologyEx(gray, cv2.MORPH_BLACKHAT, rectKernel)
-
-    # Compute the Scharr gradient of the blackhat image and scale the 
-    # result into the range [0, 255].
+    
+    # Підкреслимо контури шрифтів за допомогою градієнта.
     grad = cv2.Sobel(blackhat, ddepth=cv2.CV_32F, dx=1, dy=0, ksize=-1)
     grad = np.absolute(grad)
     (minVal, maxVal) = (np.min(grad), np.max(grad))
     grad = (grad - minVal) / (maxVal - minVal)
     grad = (grad * 255).astype("uint8")
 
-    # Apply a closing operation using the rectangular kernel to close 
-    # gaps in between letters -- then apply Otsu's thresholding method.
     grad = cv2.morphologyEx(grad, cv2.MORPH_CLOSE, rectKernel)
     thresh = cv2.threshold(grad, 0, 255, 
         cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
 
-    # Perform another closing operation, this time using the square 
-    # kernel to close gaps between lines of the MRZ, then perform a 
-    # series of erosions to break apart connected components.
     thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, sqKernel)
     thresh = cv2.erode(thresh, None, iterations=2)
 
