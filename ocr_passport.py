@@ -1,5 +1,6 @@
 # Import the necessary packages.
 import sys
+import time
 
 import pytesseract
 import cv2

@@ -1,3 +1,4 @@
+import tkinter as tk
 from tkinter.filedialog import askopenfilename
 import os
 import sys
@@ -16,9 +17,9 @@ ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light".
 class Window(ctk.CTk):
 
     WIDTH = 1431
-    HEIGHT = 789
+    HEIGHT = 805
     
-    LARGE_FONT = ("Calibri Light", 42)
+    LARGE_FONT = ("Calibri", 42)
     MEDIUM_FONT = ("Calibri Light", 32)
     SMALL_FONT = ("Calibri Light", 28)
 
@@ -48,7 +49,7 @@ class Window(ctk.CTk):
         self.geometry(
             f"{self.WIDTH}x{self.HEIGHT}+{self.WINDOW_CENTERING_X}+{self.WINDOW_CENTERING_Y}"
         )
-        self.minsize(1365, 690)
+        self.minsize(1400, 789)
 
         self.grid_rowconfigure((0, 1, 2, 3), weight=1)
         self.grid_columnconfigure((0, 1, 2), weight=1)
@@ -60,12 +61,13 @@ class Window(ctk.CTk):
         Fill the window with widgets.
         """
         self.label_1 = ctk.CTkLabel(self, text="Оптичне розпізнавання\nсимволів Вашого\nпаспорта", 
-                                    font=("Calibri Light", 42, "bold"), width=600)
-        self.label_1.grid(row=0, column=0, padx=10, pady=(40, 30))
+                                    font=self.LARGE_FONT, width=600, height=150, 
+                                    fg_color=("gray83", "gray30"), corner_radius=10)
+        self.label_1.grid(row=0, column=0, padx=(25, 10), pady=(40, 30), sticky="nswe")
         
         self.label_2 = ctk.CTkLabel(self, text="Виберіть фотографію\nпаспорта", 
                                     font=self.LARGE_FONT, width=600)
-        self.label_2.grid(row=0, column=2, padx=10, pady=(40, 30))
+        self.label_2.grid(row=0, column=2, padx=(10, 25), pady=(40, 30), sticky="nswe")
         
         self.button = ctk.CTkButton(self, text="", width=170, height=80, corner_radius=10, 
                                     image=self.check_mrz, command=self.set_mrz)
@@ -87,16 +89,16 @@ class Window(ctk.CTk):
         self.mrz_textbox = ctk.CTkTextbox(self, height=330, width=600, corner_radius=10, 
                                        font=("Consolas", 32, "bold"))
 
-        # self.frame_theme = ctk.CTkFrame(self, height=10, fg_color="gray")
-        # self.frame_theme.grid(row=3, column=0, columnspan=3, sticky="we")
+        self.frame_theme = ctk.CTkFrame(self, height=10, fg_color="transparent")
+        self.frame_theme.grid(row=3, column=0, columnspan=3, sticky="we")
 
-        # self.label_theme = ctk.CTkLabel(self.frame_theme, text="Вигляд вікна:", font=self.SMALL_FONT)
-        # self.appearance_mode = ctk.CTkOptionMenu(self.frame_theme, font=("Calibri", 16), 
-        #                                          values=["Світлий", "Темний"], text_color=("#1f1f1f", "#ebebeb"), 
-        #                                          command=self.change_appearance_mode)
-        # self.appearance_mode.set("Темний")
-        # self.label_theme.pack(pady=(0, 40), padx=(20, 10))
-        # self.appearance_mode.pack(pady=(0, 40), padx=(10, 20))
+        self.label_theme = ctk.CTkLabel(self.frame_theme, text="Вигляд вікна:", font=("Calibri", 24))
+        self.appearance_mode = ctk.CTkOptionMenu(self.frame_theme, font=("Calibri", 20), 
+                                                 values=["Світлий", "Темний"], text_color=("#1f1f1f", "#ebebeb"), 
+                                                 command=self.change_appearance_mode)
+        self.appearance_mode.set("Темний")
+        self.label_theme.pack(pady=(0, 20), padx=(20, 15), side=tk.LEFT, expand=1, anchor=tk.E)
+        self.appearance_mode.pack(pady=(0, 20), padx=(15, 20), side=tk.LEFT, expand=1, anchor=tk.W)
                 
     def set_mrz(self):
         self.passport_path = askopenfilename(parent=self, title="Виберіть файл зображення")
@@ -122,7 +124,7 @@ class Window(ctk.CTk):
                 self.loading.grid_remove()
                 self.passport_label.configure(image=passport_photo)
                 self.arrow_label.pack()
-                self.mrz_textbox.grid(row=2, column=2, padx=10, pady=(0, 20))
+                self.mrz_textbox.grid(row=2, column=2, padx=(10, 25), pady=(0, 20))
 
                 with open(os.path.join(sys.path[0], "Result.txt"), "a") as out:
                     out.write("\n\n" + mrz_text + "\n------------------------------")
@@ -130,22 +132,22 @@ class Window(ctk.CTk):
             else:
                 self.loading.grid_remove()
                 self.mrz_textbox.insert(0.0, "Неможливо завантажити результати\n\nMRZ не виявлено.")
-                self.mrz_textbox.grid(row=2, column=2, padx=10, pady=(0, 20))
+                self.mrz_textbox.grid(row=2, column=2, padx=(10, 25), pady=(0, 20))
                 
         except ValueError:
             self.loading.grid_remove()
             self.mrz_textbox.insert(0.0, "Неможливо завантажити результати\n\nВиберіть інше фото.")
-            self.mrz_textbox.grid(row=2, column=2, padx=10, pady=(0, 20))
+            self.mrz_textbox.grid(row=2, column=2, padx=(10, 25), pady=(0, 20))
             
         except PIL.UnidentifiedImageError:
                 self.loading.grid_remove()
                 self.mrz_textbox.insert(0.0, "Неможливо завантажити результати\n\nВиберіть інший файл.")
-                self.mrz_textbox.grid(row=2, column=2, padx=10, pady=(0, 20))
+                self.mrz_textbox.grid(row=2, column=2, padx=(10, 25), pady=(0, 20))
                 
         except:
             self.loading.grid_remove()
             self.mrz_textbox.insert(0.0, "Неможливо завантажити результати\n\nСпробуйте ще раз.")
-            self.mrz_textbox.grid(row=2, column=2, padx=10, pady=(0, 20))
+            self.mrz_textbox.grid(row=2, column=2, padx=(10, 25), pady=(0, 20))
 
     def change_appearance_mode(self, new_appearance_mode):
         """
