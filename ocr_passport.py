@@ -1,6 +1,5 @@
 # Import the necessary packages.
 import sys
-import time
 
 import pytesseract
 import cv2
@@ -33,6 +32,7 @@ def ocr_passport(image) -> str:
     # background.
     gray = cv2.GaussianBlur(gray, (3, 3), 0)
     blackhat = cv2.morphologyEx(gray, cv2.MORPH_BLACKHAT, rectKernel)
+    # cv2.imshow("blackhat", blackhat)
     
     # Підкреслимо контури шрифтів за допомогою градієнта.
     grad = cv2.Sobel(blackhat, ddepth=cv2.CV_32F, dx=1, dy=0, ksize=-1)
@@ -47,7 +47,8 @@ def ocr_passport(image) -> str:
 
     thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, sqKernel)
     thresh = cv2.erode(thresh, None, iterations=2)
-
+    # cv2.imshow("thresh", thresh)
+    
     # Find contours in the thresholded image and sort them from bottom 
     # to top (since the MRZ will always be at the bottom of the passport).
     cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, 
@@ -93,6 +94,9 @@ def ocr_passport(image) -> str:
     # Use Tesseract trained on the ocrb font for improved accuracy.
     mrzText = pytesseract.image_to_string(mrz, lang="ocrb")
     mrzText = mrzText.replace(" ", "")
+    # cv2.imshow("", mrz)
+    # cv2.waitKey(0)
+    
     return mrzText
 
 

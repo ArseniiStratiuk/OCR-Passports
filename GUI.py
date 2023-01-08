@@ -6,7 +6,7 @@ import threading
 
 import customtkinter as ctk
 import PIL
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from ocr_passport import ocr_passport
 
@@ -87,7 +87,8 @@ class Window(ctk.CTk):
                                         text="", width=100)
         
         self.mrz_textbox = ctk.CTkTextbox(self, height=330, width=600, corner_radius=10, 
-                                       font=("Consolas", 32, "bold"))
+                                          font=("Consolas", 32, "bold"), wrap=tk.NONE, 
+                                          padx=10, pady=10, border_spacing=10)
 
         self.frame_theme = ctk.CTkFrame(self, height=10, fg_color="transparent")
         self.frame_theme.grid(row=3, column=0, columnspan=3, sticky="we")
@@ -116,7 +117,8 @@ class Window(ctk.CTk):
         
     def mrz_to_text(self):
         try:
-            passport_photo = ctk.CTkImage(Image.open(self.passport_path), size=(600, 330))
+            passport_photo = ctk.CTkImage(self.add_corners(Image.open(self.passport_path), 10), 
+                                          size=(600, 330))
             mrz_text = ocr_passport(self.passport_path)
             self.mrz_textbox.insert(0.0, mrz_text)
             
@@ -125,9 +127,6 @@ class Window(ctk.CTk):
                 self.passport_label.configure(image=passport_photo)
                 self.arrow_label.pack()
                 self.mrz_textbox.grid(row=2, column=2, padx=(10, 25), pady=(0, 20))
-
-                with open(os.path.join(sys.path[0], "Result.txt"), "a") as out:
-                    out.write("\n\n" + mrz_text + "\n------------------------------")
 
             else:
                 self.loading.grid_remove()
@@ -157,6 +156,19 @@ class Window(ctk.CTk):
             ctk.set_appearance_mode("Dark")
         elif new_appearance_mode == "Світлий":
             ctk.set_appearance_mode("Light")
+            
+    def add_corners(self, im, rad, *args):
+        circle = Image.new('L', (rad * 2, rad * 2), 0)
+        draw = ImageDraw.Draw(circle)
+        draw.ellipse((0, 0, rad * 2 - 1, rad * 2 - 1), fill=255)
+        alpha = Image.new('L', im.size, 255)
+        w, h = im.size
+        alpha.paste(circle.crop((0, 0, rad, rad)), (0, 0))
+        alpha.paste(circle.crop((0, rad, rad, rad * 2)), (0, h - rad))
+        alpha.paste(circle.crop((rad, 0, rad * 2, rad)), (w - rad, 0))
+        alpha.paste(circle.crop((rad, rad, rad * 2, rad * 2)), (w - rad, h - rad))
+        im.putalpha(alpha)
+        return im
 
 
 if __name__ == "__main__":
