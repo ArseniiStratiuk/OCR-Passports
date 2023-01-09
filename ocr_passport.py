@@ -1,4 +1,4 @@
-# Import the necessary packages.
+# Імпортуємо необхідні модулі.
 import sys
 
 import pytesseract
@@ -14,90 +14,92 @@ pytesseract.pytesseract.tesseract_cmd = (
 
 def ocr_passport(image) -> str:
     """
-    Separate the area containing MRZ (Machine Readable Zone) 
-    from the passport photo and OCR it.
+    Відокремити ділянку, що містить MRZ (машинозчитувану зону), 
+    з фотографії паспорта та розпізнати її символи.
     """
     # Завантажимо вхідне зображення, перетворимо його на відтінки 
     # сірого та візьмемо його розміри.
     image = cv2.imread(image)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    (H, W) = gray.shape
+    (HEIGHT, WIDTH) = gray.shape
 
     # Ініціалізуємо прямокутне і квадратне структурне ядро.
-    rectKernel = cv2.getStructuringElement(cv2.MORPH_RECT, (25, 7))
-    sqKernel = cv2.getStructuringElement(cv2.MORPH_RECT, (21, 21))
+    rect_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (25, 7))
+    sq_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (21, 21))
 
-    # Smooth the image using a 3x3 Gaussian blur and then apply a 
-    # blackhat morpholigical operator to find dark regions on a light 
-    # background.
+    # Згладьмо зображення за допомогою 3х3 розмивання Гауса 
+    # і застосуємо морфологічний оператор blackhat для знаходження 
+    # темних областей на світлому фоні.
     gray = cv2.GaussianBlur(gray, (3, 3), 0)
-    blackhat = cv2.morphologyEx(gray, cv2.MORPH_BLACKHAT, rectKernel)
-    # cv2.imshow("blackhat", blackhat)
+    blackhat = cv2.morphologyEx(gray, cv2.MORPH_BLACKHAT, rect_kernel)
+    # cv2.imshow("Blackhat", blackhat)
     
     # Підкреслимо контури шрифтів за допомогою градієнта.
     grad = cv2.Sobel(blackhat, ddepth=cv2.CV_32F, dx=1, dy=0, ksize=-1)
     grad = np.absolute(grad)
-    (minVal, maxVal) = (np.min(grad), np.max(grad))
-    grad = (grad - minVal) / (maxVal - minVal)
+    (min_val, max_val) = (np.min(grad), np.max(grad))
+    grad = (grad - min_val) / (max_val - min_val)
     grad = (grad * 255).astype("uint8")
 
-    grad = cv2.morphologyEx(grad, cv2.MORPH_CLOSE, rectKernel)
+    grad = cv2.morphologyEx(grad, cv2.MORPH_CLOSE, rect_kernel)
     thresh = cv2.threshold(grad, 0, 255, 
         cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
 
-    thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, sqKernel)
+    thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, sq_kernel)
     thresh = cv2.erode(thresh, None, iterations=2)
     # cv2.imshow("thresh", thresh)
     
-    # Find contours in the thresholded image and sort them from bottom 
-    # to top (since the MRZ will always be at the bottom of the passport).
-    cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, 
+    # Знайдімо контури на бінарному зображенні й відсортуймо їх 
+    # знизу і догори (оскільки MRZ завжди внизу паспорта).
+    contours = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, 
         cv2.CHAIN_APPROX_SIMPLE)
-    cnts = imutils.grab_contours(cnts)
-    cnts = sort_contours(cnts, method="bottom-to-top")[0]
+    contours = imutils.grab_contours(contours)
+    contours = sort_contours(contours, method="bottom-to-top")[0]
 
-    # Initialize the bounding box associated with the MRZ.
-    mrzBox = None
+    # Ініціалізуймо змінну, пов'язану з MRZ.
+    mrz_box = None
 
-    # Loop over the contours.
-    for c in cnts:
-        # Compute the bounding box of the contour and then derive the 
-        # how much of the image the bounding box occupies in terms of 
-        # both width and height.
+    # Переберемо отримані конури.
+    for c in contours:
+        # Обчислимо обмежувальну рамку навколо контуру, 
+        # виведемо частину зображення, яку вона займає, 
+        # і висоту цієї частини, і її ширину.
         (x, y, w, h) = cv2.boundingRect(c)
-        percentWidth = w / float(W)
-        percentHeight = h / float(H)
+        percent_height = h / float(HEIGHT)
+        percent_width = w / float(WIDTH)
         
-        # If the bounding box occupies > 80% width and > 4% height of the 
-        # image, then assume we have found the MRZ.
-        if percentWidth > 0.8 and percentHeight > 0.04:
-            mrzBox = (x, y, w, h)
+        # Якщо обмежувальна рамка займає більше 80% ширини та 4% висоти 
+        # зображення, то припустимо, що ми знайшли MRZ.
+        if percent_width > 0.8 and percent_height > 0.04:
+            mrz_box = (x, y, w, h)
             break
 
-    # If the MRZ was not found, exit the script.
-    if mrzBox is None:
-        print("[INFO] MRZ could not be found")
+    # Якщо MRZ не було знайдене, то зупинімо програму.
+    if mrz_box is None:
+        print("Машинозчитувану зону не було знайдено.")
         sys.exit(0)
 
-    # Pad the bounding box since we applied erosions and now need to re-grow it.
-    (x, y, w, h) = mrzBox
-    pX = int((x+w) * 0.03)
-    pY = int((y+h) * 0.03)
-    (x, y) = (x - pX, y - pY)
-    (w, h) = (w + (pX*2), h + (pY*2))
+    # Збільшимо обмежувальну рамку, оскільки ми застосували ерозію, 
+    # і тепер її потрібно відновити.
+    (x, y, w, h) = mrz_box
+    pad_x = int((x+w) * 0.03)
+    pad_y = int((y+h) * 0.03)
+    (x, y) = (x - pad_x, y - pad_y)
+    (w, h) = (w + (pad_x*2), h + (pad_y*2))
 
-    # Extract the padded MRZ from the image.
+    # Вилучимо отриману рамку з вхідного зображення.
     mrz = image[y:y + h, x:x + w]
 
-    # OCR the MRZ region of interest using Tesseract, 
-    # removing any occurrences of spaces. 
-    # Use Tesseract trained on the ocrb font for improved accuracy.
-    mrzText = pytesseract.image_to_string(mrz, lang="ocrb")
-    mrzText = mrzText.replace(" ", "")
-    # cv2.imshow("", mrz)
+    # Перетворимо знайдену ділянку з MRZ у текст, використовуючи 
+    # Tesseract і видаляючи будь-які пробіли. 
+    # Використаймо треновану на шрифті OCR-B модель Tesseract, 
+    # аби поліпшити точність програми.
+    mrz_text = pytesseract.image_to_string(mrz, lang="ocrb")
+    mrz_text = mrz_text.replace(" ", "")
+    # cv2.imshow("MRZ", mrz)
     # cv2.waitKey(0)
     
-    return mrzText
+    return mrz_text
 
 
 if __name__ == "__main__":

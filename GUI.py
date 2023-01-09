@@ -26,7 +26,7 @@ class Window(ctk.CTk):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # Upload images that will be used in the program.
+        # Завантажити зображення, які будуть використовуватися в програмі.
         self.ARROW_DARK = Image.open(os.path.join(sys.path[0]+"\Icons", "Arrow_Dark.png"))
         self.ARROW_LIGHT = Image.open(os.path.join(sys.path[0]+"\Icons", "Arrow_Light.png"))
         self.arrow_image = ctk.CTkImage(self.ARROW_DARK, self.ARROW_LIGHT, (100, 100))
@@ -58,7 +58,7 @@ class Window(ctk.CTk):
         
     def create_widgets(self):
         """
-        Fill the window with widgets.
+        Заповнити вікно віджетами.
         """
         self.label_1 = ctk.CTkLabel(self, text="Оптичне розпізнавання\nсимволів Вашого\nпаспорта", 
                                     font=self.LARGE_FONT, width=600, height=150, 
@@ -130,27 +130,27 @@ class Window(ctk.CTk):
 
             else:
                 self.loading.grid_remove()
-                self.mrz_textbox.insert(0.0, "Неможливо завантажити результати\n\nMRZ не виявлено.")
+                self.mrz_textbox.insert(0.0, "Неможливо завантажити результат\n\nMRZ не виявлено.")
                 self.mrz_textbox.grid(row=2, column=2, padx=(10, 25), pady=(0, 20))
                 
         except ValueError:
             self.loading.grid_remove()
-            self.mrz_textbox.insert(0.0, "Неможливо завантажити результати\n\nВиберіть інше фото.")
+            self.mrz_textbox.insert(0.0, "Неможливо завантажити результат\n\nВиберіть інше фото.")
             self.mrz_textbox.grid(row=2, column=2, padx=(10, 25), pady=(0, 20))
             
         except PIL.UnidentifiedImageError:
                 self.loading.grid_remove()
-                self.mrz_textbox.insert(0.0, "Неможливо завантажити результати\n\nВиберіть інший файл.")
+                self.mrz_textbox.insert(0.0, "Неможливо завантажити результат\n\nВиберіть інший файл.")
                 self.mrz_textbox.grid(row=2, column=2, padx=(10, 25), pady=(0, 20))
                 
         except:
             self.loading.grid_remove()
-            self.mrz_textbox.insert(0.0, "Неможливо завантажити результати\n\nСпробуйте ще раз.")
+            self.mrz_textbox.insert(0.0, "Неможливо завантажити результат\n\nСпробуйте ще раз.")
             self.mrz_textbox.grid(row=2, column=2, padx=(10, 25), pady=(0, 20))
 
     def change_appearance_mode(self, new_appearance_mode):
         """
-        Change the window's theme (Dark or Light).
+        Змінити вигляд вікна (темний або світлий).
         """
         if new_appearance_mode == "Темний":
             ctk.set_appearance_mode("Dark")
@@ -158,16 +158,23 @@ class Window(ctk.CTk):
             ctk.set_appearance_mode("Light")
             
     def add_corners(self, im, rad, *args):
+        """
+        Додати заокруглені кути до зображення.
+        """
         circle = Image.new('L', (rad * 2, rad * 2), 0)
         draw = ImageDraw.Draw(circle)
         draw.ellipse((0, 0, rad * 2 - 1, rad * 2 - 1), fill=255)
+        
         alpha = Image.new('L', im.size, 255)
         w, h = im.size
+        
         alpha.paste(circle.crop((0, 0, rad, rad)), (0, 0))
         alpha.paste(circle.crop((0, rad, rad, rad * 2)), (0, h - rad))
         alpha.paste(circle.crop((rad, 0, rad * 2, rad)), (w - rad, 0))
         alpha.paste(circle.crop((rad, rad, rad * 2, rad * 2)), (w - rad, h - rad))
+        
         im.putalpha(alpha)
+        
         return im
 
 
