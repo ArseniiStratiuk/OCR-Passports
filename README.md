@@ -48,4 +48,3 @@ Also make sure that path to the folder with the program does not contain any spa
 
 <i>E:\Завантаження\\& #!,\OCR-Passports\ - Incorrect path that will cause program error <br>
 <i>E:\Downloads\OCR-Passports\ - Example of a correct folder path that will not cause problems
-
